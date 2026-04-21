@@ -82,6 +82,9 @@ import kubernetes from '../app/assets/svg/skills/kubernetes.svg'
 import linux from '../app/assets/svg/skills/linux.svg'
 import sqlalchemy from '../app/assets/svg/skills/sqlalchemy.svg'
 import fastapi from '../app/assets/svg/skills/fastapi.svg'
+import powerbi from '../app/assets/svg/skills/powerbi.svg'
+import streamlit from '../app/assets/svg/skills/streamlit.svg'
+import sqlite from '../app/assets/svg/skills/sqlite.svg'
 
 
 
@@ -252,8 +255,14 @@ export const skillsImage = (skill) => {
       return linux;
     case 'sqlalchemy':
       return sqlalchemy;
+    case 'sql':
+      return sqlite;
     case 'fastapi':
       return fastapi;
+    case 'power bi':
+      return powerbi;
+    case 'streamlit':
+      return streamlit;
     default:
       break;
   }
