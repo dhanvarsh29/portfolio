@@ -50,7 +50,7 @@ async function sendEmail(payload, message) {
   const { name, email, message: userMessage } = payload;
   
   const mailOptions = {
-    from: "Portfolio", 
+    from: "Portfolio <portfolio@example.com>", 
     to: process.env.EMAIL_ADDRESS, 
     subject: `New Message From ${name}`, 
     text: message, 
@@ -59,53 +59,58 @@ async function sendEmail(payload, message) {
   };
   
   try {
+    console.log('=== EMAIL DEBUG ===');
+    console.log('To:', process.env.EMAIL_ADDRESS || 'MISSING');
+    console.log('GMAIL_PASSKEY set:', !!process.env.GMAIL_PASSKEY);
     await transporter.sendMail(mailOptions);
+    console.log('Email SENT SUCCESS');
     return true;
   } catch (error) {
-    console.error('Error while sending email:', error.message);
+    console.error('EMAIL ERROR:', error.code || error.message);
+    console.error('Full error:', error);
     return false;
   }
 };
 
 export async function POST(request) {
+  console.log('Contact form submitted');
   try {
     const payload = await request.json();
+    console.log('Form data:', JSON.stringify(payload, null, 2));
     const { name, email, message: userMessage } = payload;
     const token = process.env.TELEGRAM_BOT_TOKEN;
     const chat_id = process.env.TELEGRAM_CHAT_ID;
 
-    // Validate environment variables
-    if (!token || !chat_id) {
-      return NextResponse.json({
-        success: false,
-        message: 'Telegram token or chat ID is missing.',
-      }, { status: 400 });
+    const message = `New message from ${name}
+
+Email: ${email}
+
+Message:
+${userMessage}`;
+
+    let telegramSuccess = true;
+    if (token && chat_id) {
+      telegramSuccess = await sendTelegramMessage(token, chat_id, message);
+    } else {
+      console.log('Telegram skipped - vars missing');
     }
 
-    const message = `New message from ${name}\n\nEmail: ${email}\n\nMessage:\n\n${userMessage}\n\n`;
-
-    // Send Telegram message
-    const telegramSuccess = await sendTelegramMessage(token, chat_id, message);
-
-    // Send email
     const emailSuccess = await sendEmail(payload, message);
 
-    if (telegramSuccess && emailSuccess) {
-      return NextResponse.json({
-        success: true,
-        message: 'Message and email sent successfully!',
-      }, { status: 200 });
-    }
+    const responseMsg = telegramSuccess && emailSuccess ? 'All sent!' : 
+      emailSuccess ? 'Email sent (Telegram skipped)' : 
+      'Email failed';
 
     return NextResponse.json({
-      success: false,
-      message: 'Failed to send message or email.',
-    }, { status: 500 });
+      success: emailSuccess,
+      message: responseMsg,
+    }, { status: emailSuccess ? 200 : 500 });
   } catch (error) {
-    console.error('API Error:', error.message);
+    console.error('POST ERROR:', error);
     return NextResponse.json({
       success: false,
-      message: 'Server error occurred.',
+      message: 'Server error',
     }, { status: 500 });
   }
 };
+
