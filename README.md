@@ -35,10 +35,6 @@ A professional portfolio template built with **Next.js 16**, **React 19**, and *
 ## Demo :movie_camera:
 
 <p align="center">
-  <img src="./public/image/screen.png" alt="Portfolio Screenshot" width="100%">
-</p>
-
-<p align="center">
   <a href="https://abusaid.netlify.app/" target="_blank">
     <strong>🚀 View Live Demo</strong>
   </a>
